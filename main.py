@@ -65,6 +65,8 @@ def main():
     f_transforms = []
 
     mode = "mono"
+    print("Create animated spectogram for " + filename + ".")
+    print("WARNING: THIS PROGRAM WORKS ONLY WITH MONO WAVE FILES.")
     if mode == "mono":
         no_of_blocks = int( len(data) / float(block_size) )
         audio_duration = len(data) / float(sample_rate)
@@ -213,6 +215,7 @@ def write_video(config, audio_duration, prepared_images):
         time_left = time - time_before_current
         time_right = time + time_after_current
         img = create_empty_image(bg_color, video_size_x, video_size_y)
+        # I guess this can be sped up.
         for ix in range(video_size_x):
             pixel_time = time_left + ix * delta_pixel_time
             distance_from_time = abs(pixel_time - time)
