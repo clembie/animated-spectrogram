@@ -1,5 +1,5 @@
-# animated-spectogram
-Converts your audio to an animated spectogram.
+# animated-spectrogram
+Converts your audio to an animated spectrogram.
 An example can be found in my [YouTube video](https://www.youtube.com/watch?v=H4UnyiCxFfE).
 
 
