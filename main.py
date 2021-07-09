@@ -87,7 +87,8 @@ def main():
         max_f = 1.0 / (2.0*T)
         delta_f = max_f / (block_size * 0.5)
         freqs = [i * delta_f for i in range(block_size/2)]
-        axis_positions = get_log_axis_positions(freqs)
+        #axis_positions = get_log_axis_positions(freqs)
+        axis_positions = get_lin_axis_positions(freqs)
         max_f_value = 0
         for i in range(no_of_blocks):
             start_index = i * block_size
