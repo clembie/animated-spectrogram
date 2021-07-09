@@ -44,6 +44,19 @@ def get_log_axis_positions(frequencies):
         axis_positions.append(pos)
     return axis_positions
 
+def get_lin_axis_positions(frequencies):
+    """
+    Returns an array containing the linearly
+    distributed frequency positions
+    on a scale ranging from 0 to 1.
+    """
+    axis_positions = []
+    max_freq = frequencies[-1]
+    for f in frequencies[1:]:
+        pos = f / max_freq
+        axis_positions.append(pos)
+    return axis_positions
+
 def main():
     delete_and_create_folders()
     config = get_config("./options.cfg")["DEFAULT"]
