@@ -9,6 +9,7 @@ import subprocess
 import shutil
 import os
 
+
 def create_empty_image(bg_color, size_x=1920, size_y=1080):
     """
     This returns the array on which will be drawn.
@@ -18,8 +19,6 @@ def create_empty_image(bg_color, size_x=1920, size_y=1080):
             dtype=np.uint8) * np.ones((size_y, size_x, 1), dtype=np.uint8)
     return img
 
-
-
 def get_config(filename):
     """
     All settings are stored in an external text file.
@@ -27,7 +26,6 @@ def get_config(filename):
     config = configparser.ConfigParser()
     config.read(filename)
     return config
-
 
 def get_log_axis_positions(frequencies):
     """
@@ -62,6 +60,7 @@ def main():
     config = get_config("./options.cfg")["DEFAULT"]
 
     filename = config["input_file"]
+    # stereo_file = config["stereo_file"]
     image_height = int(float(config["image_height"]) * int(config["video_size_y"]))
     windows_length = float(config["windows_length"])
     saturation_value = float(config["saturation_value"])
@@ -70,7 +69,6 @@ def main():
     bg_color = get_color_from_string(config["bg_color"])
     color_active = get_color_from_string(config["color_active"])
     color_silent = get_color_from_string(config["color_silent"])
-
 
     sample_rate, data = wavfile.read(filename)
     block_size = int(sample_rate * windows_length)
@@ -99,13 +97,10 @@ def main():
             f_transform = abs(f_transform[0:len(f_transform)/2])
             #f_transform = np.log(f_transform)
 
-
             f_transforms.append(f_transform)
-
 
             if max(f_transform) > max_f_value:
                 max_f_value = max(f_transform)
-
 
             with open("./single_ffts/%06i.dat" % i, "w") as outfile:
                 for index, f in enumerate(f_transform[1:]):
@@ -128,9 +123,6 @@ def main():
             values_in_image[0] = 0.0
             image_columns.append(values_in_image)
 
-
-
-
         img_active = create_empty_image([0,0,0], size_x=len(f_transforms), size_y=image_height)
         img_silent = create_empty_image([0,0,0], size_x=len(f_transforms), size_y=image_height)
 
@@ -150,15 +142,12 @@ def main():
 
     write_video(config, audio_duration, prepared_images)
 
-
-
 def get_color_from_string(color_str):
     """
     This converts the colors from the options file
     to a list of ints: [b,g,r].
     """
     return [int(c) for c in color_str.split(",")]
-
 
 def resize_image_to_height(img, new_height):
     """
@@ -168,7 +157,6 @@ def resize_image_to_height(img, new_height):
     img_resized = cv2.resize(img, (int(new_width), new_height))
     return img_resized
 
-
 def resize_image_to_width(img, new_width):
     """
     This preserves the aspect ratio.
@@ -176,9 +164,6 @@ def resize_image_to_width(img, new_width):
     new_height = round(new_width * img.shape[0] / float(img.shape[1]))
     img_resized = cv2.resize(img, (new_width, int(new_height)))
     return img_resized
-
-
-
 
 def value_to_color(value, max_v, bg_color, max_color):
     color = []
@@ -196,8 +181,6 @@ def print_progress(msg, current, total):
     text = "\r" + msg + " {:9.1f}/{:.1f}".format(current, total)
     sys.stdout.write(text)
     sys.stdout.flush()
-
-
 
 def write_video(config, audio_duration, prepared_images):
     print("Write video. Length of audio: " + str(audio_duration) + " s")
@@ -257,9 +240,8 @@ def write_video(config, audio_duration, prepared_images):
         print_progress("Current time:", time, end_time)
     print("")
     run_ffmpeg(frame_rate, video_size_x, video_size_y)
+    make_stereo(config["stereo_file"])
     shutil.rmtree("./tmp_images/")
-
-
 
 def run_ffmpeg(frame_rate, size_x, size_y):
     """
@@ -284,6 +266,26 @@ def run_ffmpeg(frame_rate, size_x, size_y):
     call_list.append("./output/final.mp4")
     subprocess.call(call_list)
 
+def make_stereo(stereo_file):
+    """
+    Create a version with stereo sound from supplied stereo audio file
+    ffmpeg -i video.mp4 -i audio.wav -map 0:v -map 1:a -c:v copy -shortest output.mp4
+    """
+    call_list = []
+    call_list.append("ffmpeg")
+    call_list.append("-i")
+    call_list.append("./output/final.mp4")
+    call_list.append("-i")
+    call_list.append("{:s}".format(stereo_file))
+    call_list.append("-map")
+    call_list.append("0:v")
+    call_list.append("-map")
+    call_list.append("1:a")
+    call_list.append("-c:v")
+    call_list.append("copy")
+    call_list.append("-shortest")
+    call_list.append("./output/final_st.mp4")
+    subprocess.call(call_list)
 
 def delete_and_create_folders():
     """
